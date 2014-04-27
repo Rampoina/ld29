@@ -27,33 +27,6 @@ Worm.prototype.spawn = function(width) {
 }
 Worm.prototype.move = function(width) {
 
-    /*
-
-    for (var i = this.size-2; i >= 0 ; i--) {
-        var worm = this.worms.getAt(i);
-        var nextworm = this.worms.getAt(i+1);
-
-        worm.rotation = nextworm.rotation;
-        worm.r = nextworm.r;
-        worm.reset(nextworm.x,nextworm.y);
-    }
-    this.r -= 0.0;
-    var worm = this.worms.getAt(this.size-1);
-    if (worm.r < -25) {
-        var rot = ((Math.PI*2)/(Math.PI*width+worm.r))*this.vel;
-        worm.rotation += rot;
-        worm.r -= (16)/((2*Math.PI)/rot);
-    }
-    else {
-        worm.r -= this.vel;
-    }
-
-    var x = w/2+(width/2+worm.r)*Math.cos(worm.rotation-Math.PI/2);
-    var y = h/2+(width/2+worm.r)*Math.sin(worm.rotation-Math.PI/2);
-
-    worm.reset(x,y);
-
-*/
     var t = ((Math.PI*2)*this.vel);
     this.worms.forEachAlive(function(worm) {
         if (worm.r < -16) {
@@ -82,6 +55,8 @@ Worm.prototype.kill = function() {
 var play_state = {
 
     create: function() {
+        this.game.physics.startSystem(Phaser.Physics.ARCADE);
+
 
         this.game.stage.smoothed = false;
         this.cursor = this.game.input.keyboard.createCursorKeys();
@@ -105,7 +80,8 @@ var play_state = {
         this.apple.scale.setTo(5,5);
         this.core = this.game.add.sprite(w/2-30,h/2-30, 'core');
         this.core.scale.setTo(5,5);
-        this.firing = false;
+        this.core.enableBody = true;
+        this.core.physicsBodyType = Phaser.Physics.ARCADE;
 
         this.bullets = this.game.add.group();
         this.bullets.enableBody = true;
@@ -120,14 +96,17 @@ var play_state = {
         this.leaf = this.game.add.sprite(w/2,h/2-140, 'leaf');
         this.leaf.scale.setTo(5,5);
         this.worm = new Worm(20,this.game);
-        this.worm1 = new Worm(10,this.game);
-        this.worm2 = new Worm(20,this.game);
+
         this.rotation = this.game.add.text(200,20,'',{font:'16px Arial',fill: '#ffffff' });
         this.game.time.advancedTiming = true;
         this.fpsText = this.game.add.text(20,20,'',{font:'16px Arial',fill: '#ffffff' });
         this.worm.spawn(this.apple.width);
-        this.worm1.spawn(this.apple.width);
-        this.worm2.spawn(this.apple.width);
+
+        this.peach = this.game.add.sprite(w/2, h/2, 'peach');
+        this.peach.scale.setTo(5,5);
+        this.peach.anchor.setTo(0.5,0.5);
+        this.firing = false;
+        tween = game.add.tween(this.peach).to({alpha: 0}, 2000, Phaser.Easing.Linear.None, true, 0, 1000, true);
 
     },
 
@@ -138,6 +117,7 @@ var play_state = {
             this.bullet.rotation = this.hero.rotation;
             var destx = w/2;
             var desty = h/2;
+            this.bullet.scale.setTo(5,5);
             this.bullet.reset(this.hero.x,this.hero.y);
             var tween = game.add.tween(this.bullet).to({x: destx, y: desty},400);
             tween.onComplete.add(this.kill, this);
@@ -154,6 +134,7 @@ var play_state = {
     },
 
     killworm: function(bullet, worm) {
+        console.log("Dead");
         bullet.kill();
         worm.kill();
     },
@@ -179,9 +160,8 @@ var play_state = {
         var x = w/2+(this.apple.width/2)*Math.cos(this.hero.rotation-Math.PI/2);
         var y = h/2+(this.apple.width/2)*Math.sin(this.hero.rotation-Math.PI/2);
         this.hero.reset(x, y);
+        this.worm.kill();
         this.worm.move(this.apple.width);
-        this.worm1.move(this.apple.width);
-        this.worm2.move(this.apple.width);
         this.rotation.setText((this.hero.rotation-Math.PI/2));
         this.game.physics.arcade.overlap(this.bullets,this.worm.worms,this.killworm,null,this);
     }

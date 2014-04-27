@@ -4,6 +4,7 @@ var h = 500;
 var load_state = {
     preload: function() {
         this.game.load.image('apple', 'assets/apple.png');
+        this.game.load.image('peach', 'assets/peach.png');
         this.game.load.image('hero', 'assets/hero.png');
         this.game.load.image('worm', 'assets/worm.png');
         this.game.load.image('core', 'assets/core.png');
